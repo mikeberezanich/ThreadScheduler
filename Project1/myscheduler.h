@@ -18,6 +18,15 @@
 	*
 	*/
 
+struct node {
+	int x;
+	node *next;
+};
+
+node *first;
+node *curr;
+
+
 class MyScheduler: public Scheduler {
 public:
 	MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {}
@@ -31,5 +40,8 @@ public:
 	*
 	*
 	*/
-	void PBS_policy();
+	void FCFS_policy(int CPU[], int size);
+	void STRFwoP_policy(int CPU[], int size);
+	void STRFwP_policy(int CPU[], int size);
+	void PBS_policy(int CPU[], int size);
 };
