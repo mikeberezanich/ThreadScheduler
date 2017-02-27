@@ -11,20 +11,20 @@
 
 #include "scheduler.h"
 
-std::vector<ThreadDescriptorBlock> threadVector;
-
 
 class MyScheduler: public Scheduler {
 public:
+	std::vector<ThreadDescriptorBlock> threadVector;
+	
 	MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {}
 	bool Dispatch() override; //Function to implement scheduling policy and to keep a check on processed threads
 	void CreateThread(int arriving_time, int remaining_time, int priority, int tid) override; //Function to create threads and insert them in student defined data structure
 
 
-	void FCFS_policy(int CPU[], int size);
-	void STRFwoP_policy(int CPU[], int size);
-	void STRFwP_policy(int CPU[], int size);
-	void PBS_policy(int CPU[], int size);
+	void FCFS_policy();
+	void STRFwoP_policy();
+	void STRFwP_policy();
+	void PBS_policy();
 
 
 };

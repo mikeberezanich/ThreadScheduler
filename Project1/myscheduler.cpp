@@ -2,8 +2,7 @@
 /*Define all the functions in 'myschedule.h' here.*/
 #include "myscheduler.h"
 
-void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priority, int tid) //Thread ID not Process ID
-{
+void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priority, int tid) {
 	//Created a new instance of the structure
 	//Added each of the attributes
 	//Packaged each of them into an element of the vector
@@ -21,86 +20,78 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 
 /****************************************************
 FCFS_policy: FIRST COME FIRST SERVE
-Input: int CPU[] ----- array of all CPU's
-int size  ---- size of array
 Sorts the CPU processes by their arrival time.
 Then schedules them by their position in the array.
 ****************************************************/
-void FCFS_policy(vector<ThreadDescriptorBlock> t, int size){ //(int threadVector[], int size){
+void MyScheduler::FCFS_policy(){ 
 
 	//insertion sort the arrays based on arrival time
 	//for all the elements in the threadVector
-	for (int i = 0; i<=t.size(); i++){ //for (int i = 0; i<=threadVector::size(); i++){
-		//Make i represent the arrival_time at element i in the vector
+	for (int i = 0; i < threadVector.size(); i++) { 
 		int j = i - 1;
-		ThreadDescriptorBlock temp = t.at(i); //threadVector.tdb.arriving_time[i];
-		while(j >= 0 && temp.arriving_time < t.at(j).arriving_time) { //threadVector.tdb.arriving_time[j]){
-			//t.at(j + 1).arriving_time = t.at(j).arriving_time; //threadVector.tdb.arriving_time[j + 1] = threadVector.tdb.arriving_time[j];
-			t.at(j + 1) = t.at(j);
+		ThreadDescriptorBlock temp = threadVector.at(i);
+		while(j >= 0 && temp.arriving_time < threadVector.at(j).arriving_time) {
+			threadVector.at(j + 1) = threadVector.at(j);
 			j--;
 		}
-		t.at(j + 1) = temp; //threadVector.tdb.arriving_time[j+1] = temp;
-
-		//at this point the vector should be sorted by arriving_time
+		threadVector.at(j + 1) = temp; 
 	}
 
-	//return the threadvector? how do we get it back to the dispatch
-	//are we returning a single thread or all the threads?
-
+	//at this point the vector should be sorted by arriving_time
 }
 
 /****************************************************
 STRFwoP_policy: SHORTEST TIME REMAINING WITHOUT PREEMPTION
-Input: int CPU[] ----- array of all CPU's
-int size  ---- size of array
 Sorts the CPU processes by their (remaining time-arrival time).
 Then schedules them by their position in the array.
 ****************************************************/
-void STRFwoP_policy(int CPU[], int size){
+void MyScheduler::STRFwoP_policy() {
 
 }
 
 /****************************************************
 STRFwP_policy: SHORTEST TIME REMAINING WITH PREEMPTION
-Input: int CPU[] ----- array of all CPU's
-int size  ---- size of array
 ****************************************************/
-void STRFwP_policy(int CPU[], int size){
+void MyScheduler::STRFwP_policy() {
 
 }
 
 /****************************************************
 PBS_policy: PRIORITY BASED SCHEDULING
-Input: int CPU[] ----- array of all CPU's
-int size  ---- size of array
 Sorts the CPU processes by their priority.
 Then schedules them by their position in the array.
 ****************************************************/
-void PBS_policy(int CPU[], int size){
+void MyScheduler::PBS_policy() {
 
 }
 
-bool MyScheduler::Dispatch()
-{
+bool MyScheduler::Dispatch() {
 	//Todo: Check and remove finished threads
 	//Todo: Check if all the threads are finished; if so, return false
 	switch(policy)
 	{
 		case FCFS:		//First Come First Serve
-			//FCFS_policy();
+			FCFS_policy();
 			break;
 		case STRFwoP:	//Shortest Time Remaining First, without preemption
-			//STRFwoP_policy;
+			STRFwoP_policy();
 			break;
 		case STRFwP:	//Shortest Time Remaining First, with preemption
-			//STRFwP_policy;
+			STRFwP_policy();
 			break;
 		case PBS:		//Priority Based Scheduling, with preemption
-			//PBS_policy;
+			PBS_policy();
 			break;
 		default :
 			cout<<"Invalid policy!";
 			throw 0;
 	}
+
+	//Assign each cpu to the beginning elements of our now sorted thread vector
+	//This assumes that the vector has been sorted by scheduling policy
+	for (int i = 0; i < num_cpu; i++) {
+		CPUs[i] = &threadVector.at(i);
+	}
+
 	return true;
 }
