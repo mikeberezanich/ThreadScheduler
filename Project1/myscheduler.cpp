@@ -65,9 +65,34 @@ void MyScheduler::PBS_policy() {
 
 }
 
+//Returns position of next available thread in threadVector or a -1 if all threads are already assigned to a CPU
+int MyScheduler::FindNextThread() {
+	for (int i = 0; i < threadVector.size(); i++) {
+		bool alreadyScheduled = false;
+		
+		for (int j = 0; j < num_cpu; j++) {
+			if (CPUs[j] == &threadVector.at(i))
+				alreadyScheduled = true;
+		}
+
+		if (!alreadyScheduled)
+			return i;
+	}
+
+	return -1;
+}
+
 bool MyScheduler::Dispatch() {
-	//Todo: Check and remove finished threads
-	//Todo: Check if all the threads are finished; if so, return false
+
+	for (int i = 0; i < threadVector.size(); i++) {
+		if (threadVector.at(i).remaining_time < 1) {
+			threadVector.erase(threadVector.begin() + i);
+		}
+	}
+
+	if (threadVector.size() < 1)
+		return false;
+
 	switch(policy)
 	{
 		case FCFS:		//First Come First Serve
@@ -90,20 +115,16 @@ bool MyScheduler::Dispatch() {
 	//Assign each cpu to the beginning elements of our now sorted thread vector
 	//This assumes that the vector has been sorted by scheduling policy
 	for (int i = 0; i < num_cpu; i++) {
+		
+		if (CPUs[i] == NULL) {
+			int pos = FindNextThread();
 
-		//If current thread being assigned is done, remove from vector and reset i so that correct threads are assigned to cpus
-		if (threadVector.at(i).remaining_time <= 0) {
-			threadVector.erase(threadVector.begin() + i);
-			i = 0;
-		}
-
-		if (threadVector.size() <= 0) {
-			return false;
-		} 
-		else {
-			CPUs[i] = &threadVector.at(i);
+			//if FindNextThread finds a thread that needs assigned
+			if (pos != -1)
+				CPUs[i] = &threadVector.at(pos);
 		}
 	}
+		
 
 	//Printing for debugging purposes
 	/*for (int i = 0; i < threadVector.size(); i++) {
