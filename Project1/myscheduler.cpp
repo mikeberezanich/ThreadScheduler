@@ -90,8 +90,29 @@ bool MyScheduler::Dispatch() {
 	//Assign each cpu to the beginning elements of our now sorted thread vector
 	//This assumes that the vector has been sorted by scheduling policy
 	for (int i = 0; i < num_cpu; i++) {
-		CPUs[i] = &threadVector.at(i);
+
+		//If current thread being assigned is done, remove from vector and reset i so that correct threads are assigned to cpus
+		if (threadVector.at(i).remaining_time <= 0) {
+			threadVector.erase(threadVector.begin() + i);
+			i = 0;
+		}
+
+		if (threadVector.size() <= 0) {
+			return false;
+		} 
+		else {
+			CPUs[i] = &threadVector.at(i);
+		}
 	}
+
+	//Printing for debugging purposes
+	/*for (int i = 0; i < threadVector.size(); i++) {
+		if (i < num_cpu)
+			cout << "CPU " << i << " executing thread " << CPUs[i]->tid << endl;
+
+		cout << "Thread " << threadVector.at(i).tid << " - Rtime: " << threadVector.at(i).remaining_time << endl;
+		system("pause");
+	}*/
 
 	return true;
 }
