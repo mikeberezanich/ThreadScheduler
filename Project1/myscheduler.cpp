@@ -4,9 +4,19 @@
 
 void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priority, int tid) //Thread ID not Process ID
 {
-	cout << "hi" << endl;
-	//Function to Create Thread(s) and insert them in the student
-	//defined data structure
+	//Created a new instance of the structure
+	//Added each of the attributes
+	//Packaged each of them into an element of the vector
+
+	struct ThreadDescriptorBlock tdb;
+
+	tdb.tid = tid;
+	tdb.remaining_time = remaining_time;
+	tdb.arriving_time = arriving_time;
+	tdb.priority = priority;
+
+	threadVector.push_back(tdb);
+
 }
 
 /****************************************************
@@ -16,10 +26,25 @@ int size  ---- size of array
 Sorts the CPU processes by their arrival time.
 Then schedules them by their position in the array.
 ****************************************************/
-void MyScheduler::FCFS_policy(int CPU[], int size){
-	//sort the arrays based on arrival time
+void FCFS_policy(int threadVector[], int size){
 
+	//insertion sort the arrays based on arrival time
+	//for all the elements in the threadVector
+	for (int i = 0; i<=threadVector::size(); i++){
+		//Make i represent the arrival_time at element i in the vector
+		int j = i - 1;
+		int temp = threadVector.tdb.arriving_time[i];
+		while(j >= 0 && temp < threadVector.tdb.arriving_time[j]){
+			threadVector.tdb.arriving_time[j + 1] = threadVector.tdb.arriving_time[j];
+			j--;
+		}
+		threadVector.tdb.arriving_time[j+1] = temp;
 
+		//at this point the vector should be sorted by arriving_time
+	}
+
+	//return the threadvector? how do we get it back to the dispatch
+	//are we returning a single thread or all the threads?
 
 }
 
@@ -30,7 +55,7 @@ int size  ---- size of array
 Sorts the CPU processes by their (remaining time-arrival time).
 Then schedules them by their position in the array.
 ****************************************************/
-void MyScheduler::STRFwoP_policy(int CPU[], int size){
+void STRFwoP_policy(int CPU[], int size){
 
 }
 
@@ -39,7 +64,7 @@ STRFwP_policy: SHORTEST TIME REMAINING WITH PREEMPTION
 Input: int CPU[] ----- array of all CPU's
 int size  ---- size of array
 ****************************************************/
-void MyScheduler::STRFwP_policy(int CPU[], int size){
+void STRFwP_policy(int CPU[], int size){
 
 }
 
@@ -50,7 +75,7 @@ int size  ---- size of array
 Sorts the CPU processes by their priority.
 Then schedules them by their position in the array.
 ****************************************************/
-void MyScheduler::PBS_policy(int CPU[], int size){
+void PBS_policy(int CPU[], int size){
 
 }
 
@@ -61,16 +86,16 @@ bool MyScheduler::Dispatch()
 	switch(policy)
 	{
 		case FCFS:		//First Come First Serve
-			FCFS_policy;
+			//FCFS_policy();
 			break;
 		case STRFwoP:	//Shortest Time Remaining First, without preemption
-			STRFwoP_policy;
+			//STRFwoP_policy;
 			break;
 		case STRFwP:	//Shortest Time Remaining First, with preemption
-			STRFwP_policy;
+			//STRFwP_policy;
 			break;
 		case PBS:		//Priority Based Scheduling, with preemption
-			PBS_policy;
+			//PBS_policy;
 			break;
 		default :
 			cout<<"Invalid policy!";
