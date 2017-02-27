@@ -26,19 +26,19 @@ int size  ---- size of array
 Sorts the CPU processes by their arrival time.
 Then schedules them by their position in the array.
 ****************************************************/
-void FCFS_policy(int threadVector[], int size){
+void FCFS_policy(vector<ThreadDescriptorBlock> t, int size){ //(int threadVector[], int size){
 
 	//insertion sort the arrays based on arrival time
 	//for all the elements in the threadVector
-	for (int i = 0; i<=threadVector::size(); i++){
+	for (int i = 0; i<=t.size(); i++){ //for (int i = 0; i<=threadVector::size(); i++){
 		//Make i represent the arrival_time at element i in the vector
 		int j = i - 1;
-		int temp = threadVector.tdb.arriving_time[i];
-		while(j >= 0 && temp < threadVector.tdb.arriving_time[j]){
-			threadVector.tdb.arriving_time[j + 1] = threadVector.tdb.arriving_time[j];
+		int temp = t.at(i).arriving_time; //threadVector.tdb.arriving_time[i];
+		while(j >= 0 && temp < t.at(j).arriving_time) { //threadVector.tdb.arriving_time[j]){
+			t.at(j + 1).arriving_time = t.at(j).arriving_time; //threadVector.tdb.arriving_time[j + 1] = threadVector.tdb.arriving_time[j];
 			j--;
 		}
-		threadVector.tdb.arriving_time[j+1] = temp;
+		t.at(j + 1).arriving_time = temp; //threadVector.tdb.arriving_time[j+1] = temp;
 
 		//at this point the vector should be sorted by arriving_time
 	}

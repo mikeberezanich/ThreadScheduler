@@ -11,7 +11,7 @@
 
 #include "scheduler.h"
 
-std::vector<ThreadDescriptorBlock>threadVector;
+std::vector<ThreadDescriptorBlock> threadVector;
 
 
 class MyScheduler: public Scheduler {
