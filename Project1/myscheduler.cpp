@@ -33,12 +33,13 @@ void FCFS_policy(vector<ThreadDescriptorBlock> t, int size){ //(int threadVector
 	for (int i = 0; i<=t.size(); i++){ //for (int i = 0; i<=threadVector::size(); i++){
 		//Make i represent the arrival_time at element i in the vector
 		int j = i - 1;
-		int temp = t.at(i).arriving_time; //threadVector.tdb.arriving_time[i];
-		while(j >= 0 && temp < t.at(j).arriving_time) { //threadVector.tdb.arriving_time[j]){
-			t.at(j + 1).arriving_time = t.at(j).arriving_time; //threadVector.tdb.arriving_time[j + 1] = threadVector.tdb.arriving_time[j];
+		ThreadDescriptorBlock temp = t.at(i); //threadVector.tdb.arriving_time[i];
+		while(j >= 0 && temp.arriving_time < t.at(j).arriving_time) { //threadVector.tdb.arriving_time[j]){
+			//t.at(j + 1).arriving_time = t.at(j).arriving_time; //threadVector.tdb.arriving_time[j + 1] = threadVector.tdb.arriving_time[j];
+			t.at(j + 1) = t.at(j);
 			j--;
 		}
-		t.at(j + 1).arriving_time = temp; //threadVector.tdb.arriving_time[j+1] = temp;
+		t.at(j + 1) = temp; //threadVector.tdb.arriving_time[j+1] = temp;
 
 		//at this point the vector should be sorted by arriving_time
 	}
