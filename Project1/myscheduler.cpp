@@ -20,13 +20,13 @@ Purpose: schedule incoming threads using the following policies
 void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priority, int tid) {
 		
 	//Created a new instance of the structure
-	struct ThreadDescriptorBlock tdb;
+	struct ThreadDescriptorBlock *tdb = new ThreadDescriptorBlock;
 
 	//Add each of the attributes
-	tdb.tid = tid;
-	tdb.remaining_time = remaining_time;
-	tdb.arriving_time = arriving_time;
-	tdb.priority = priority;
+	tdb->tid = tid;
+	tdb->remaining_time = remaining_time;
+	tdb->arriving_time = arriving_time;
+	tdb->priority = priority;
 
 	//Packaged each of them into an element of the vector
 	threadVector.push_back(tdb);
@@ -44,8 +44,8 @@ void MyScheduler::FCFS_policy(){
 	//for all the elements in the threadVector
 	for (int i = 0; i < threadVector.size(); i++) { 
 		int j = i - 1;
-		ThreadDescriptorBlock temp = threadVector.at(i);
-		while(j >= 0 && temp.arriving_time < threadVector.at(j).arriving_time) {
+		ThreadDescriptorBlock *temp = threadVector.at(i);
+		while(j >= 0 && temp->arriving_time < threadVector.at(j)->arriving_time) {
 			threadVector.at(j + 1) = threadVector.at(j);
 			j--;
 		}
@@ -61,10 +61,13 @@ Sorts the CPU processes by their (remaining time-arrival time).
 Then schedules them by their position in the array.
 ****************************************************/
 void MyScheduler::STRFwoP_policy() {
+
+
+
 	for (int i = 0; i < threadVector.size(); i++) { 
 		int j = i - 1;
-		ThreadDescriptorBlock temp = threadVector.at(i);
-		while(j >= 0 && temp.remaining_time < threadVector.at(j).remaining_time) {
+		ThreadDescriptorBlock *temp = threadVector.at(i);
+		while(j >= 0 && temp->remaining_time < threadVector.at(j)->remaining_time) {
 			threadVector.at(j + 1) = threadVector.at(j);
 			j--;
 		}
@@ -95,19 +98,19 @@ int MyScheduler::FindNextThread() {
 		bool alreadyScheduled = false;
 		
 		for (int j = 0; j < num_cpu && !alreadyScheduled; j++) {
-			if (CPUs[j] == &threadVector.at(i)) {
+			if (CPUs[j] == threadVector.at(i)) {
 				alreadyScheduled = true;
 				
-				cout << "Comparing thread: " << threadVector.at(i).tid << " with CPU " << j << " which is executing "
+				cout << "Comparing thread: " << threadVector.at(i)->tid << " with CPU " << j << " which is executing "
 				<< CPUs[j]->tid << endl;
 			}
 
 			
-			cout << "Is thread already scheduled to a CPU: " << alreadyScheduled << endl;
+			cout << "Is thread: " << threadVector.at(i)->tid << " already scheduled to a CPU: " << alreadyScheduled << endl;
 		}
 
-		if (!alreadyScheduled) {
-			cout << "Assigning thread: " << threadVector.at(i).tid << " to a CPU" << endl;
+		if (!alreadyScheduled && timer >= threadVector.at(i)->arriving_time) {
+			cout << "Assigning thread: " << threadVector.at(i)->tid << " to a CPU" << endl;
 			return i;
 		}
 	}
@@ -119,7 +122,8 @@ bool MyScheduler::Dispatch() {
 
 	//Remove completed threads from threadVector
 	for (int i = 0; i < threadVector.size(); i++) {
-		if (threadVector.at(i).remaining_time < 1) {
+		if (threadVector.at(i)->remaining_time < 1) {
+			//delete threadVector.at(i);
 			threadVector.erase(threadVector.begin() + i);
 		}
 	}
@@ -128,53 +132,49 @@ bool MyScheduler::Dispatch() {
 	if (threadVector.size() < 1)
 		return false;
 
-	switch(policy)
+	switch (policy)
 	{
-		case FCFS:		//First Come First Serve
-			FCFS_policy();
-			break;
-		case STRFwoP:	//Shortest Time Remaining First, without preemption
-			STRFwoP_policy();
-			break;
-		case STRFwP:	//Shortest Time Remaining First, with preemption
-			STRFwP_policy();
-			break;
-		case PBS:		//Priority Based Scheduling, with preemption
-			PBS_policy();
-			break;
-		default :
-			cout<<"Invalid policy!";
-			throw 0;
+	case FCFS:		//First Come First Serve
+		FCFS_policy();
+		break;
+	case STRFwoP:	//Shortest Time Remaining First, without preemption
+		STRFwoP_policy();
+		break;
+	case STRFwP:	//Shortest Time Remaining First, with preemption
+		STRFwP_policy();
+		break;
+	case PBS:		//Priority Based Scheduling, with preemption
+		PBS_policy();
+		break;
+	default:
+		cout << "Invalid policy!";
+		throw 0;
 	}
 
+	bool threadsAvailable = true;
 	//Assign each cpu to the beginning elements of our now sorted thread vector
 	//This assumes that the vector has been sorted by scheduling policy
-	for (int i = 0; i < num_cpu; i++) {
-		
+	//If FindNextThread() call returns with error, no threads can be scheduled yet so we escape
+	for (int i = 0; i < num_cpu && threadsAvailable; i++) {
+
 		if (CPUs[i] == NULL) {
 			int pos = FindNextThread();
 
 			//if FindNextThread finds a thread that needs assigned
-			if (pos != -1) {
-
-				//so if this thread is being assigned before it's arrival time, we add the difference in time to 
-				//its remaining time
-				if (timer < threadVector.at(pos).arriving_time) {
-					threadVector.at(pos).remaining_time += (threadVector.at(pos).arriving_time - timer);
-				}
-
-				CPUs[i] = &threadVector.at(pos);
-			}
+			if (pos != -1) 
+				CPUs[i] = threadVector.at(pos);
+			else 
+				threadsAvailable = false;
 		}
 	}
-		
+	
 
 	//Printing for debugging purposes
 	/*for (int i = 0; i < threadVector.size(); i++) {
 		if (i < num_cpu)
 			cout << "CPU " << i << " executing thread " << CPUs[i]->tid << endl;
 
-		cout << "Thread " << threadVector.at(i).tid << " - Rtime: " << threadVector.at(i).remaining_time << endl;
+		cout << "Thread " << threadVector.at(i)->tid << " - Rtime: " << threadVector.at(i)->remaining_time << endl;
 		system("pause");
 	}*/
 

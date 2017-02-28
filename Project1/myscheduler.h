@@ -26,9 +26,13 @@ Purpose: contains the function definitions and the data structure definition
 
 class MyScheduler: public Scheduler {
 public:
-	std::vector<ThreadDescriptorBlock> threadVector;
+	std::vector<ThreadDescriptorBlock *> threadVector;
+	bool firstPass;
 	
-	MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {}
+	MyScheduler(Policy p, unsigned int n) : Scheduler(p, n) {
+		firstPass = true;
+	}
+
 	bool Dispatch() override; //Function to implement scheduling policy and to keep a check on processed threads
 	void CreateThread(int arriving_time, int remaining_time, int priority, int tid) override; //Function to create threads and insert them in student defined data structure
 	
