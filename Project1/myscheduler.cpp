@@ -94,13 +94,22 @@ int MyScheduler::FindNextThread() {
 	for (int i = 0; i < threadVector.size(); i++) {
 		bool alreadyScheduled = false;
 		
-		for (int j = 0; j < num_cpu; j++) {
-			if (CPUs[j] == &threadVector.at(i))
+		for (int j = 0; j < num_cpu && !alreadyScheduled; j++) {
+			if (CPUs[j] == &threadVector.at(i)) {
 				alreadyScheduled = true;
+				
+				cout << "Comparing thread: " << threadVector.at(i).tid << " with CPU " << j << " which is executing "
+				<< CPUs[j]->tid << endl;
+			}
+
+			
+			cout << "Is thread already scheduled to a CPU: " << alreadyScheduled << endl;
 		}
 
-		if (!alreadyScheduled)
+		if (!alreadyScheduled) {
+			cout << "Assigning thread: " << threadVector.at(i).tid << " to a CPU" << endl;
 			return i;
+		}
 	}
 
 	return -1;
@@ -146,8 +155,16 @@ bool MyScheduler::Dispatch() {
 			int pos = FindNextThread();
 
 			//if FindNextThread finds a thread that needs assigned
-			if (pos != -1)
+			if (pos != -1) {
+
+				//so if this thread is being assigned before it's arrival time, we add the difference in time to 
+				//its remaining time
+				if (timer < threadVector.at(pos).arriving_time) {
+					threadVector.at(pos).remaining_time += (threadVector.at(pos).arriving_time - timer);
+				}
+
 				CPUs[i] = &threadVector.at(pos);
+			}
 		}
 	}
 		
