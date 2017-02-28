@@ -61,6 +61,7 @@ Sorts the CPU processes by their (remaining time-arrival time).
 Then schedules them by their position in the array.
 ****************************************************/
 void MyScheduler::STRFwoP_policy() {
+<<<<<<< Updated upstream
 	
 		//insertion sort the arrays based on arrival time
 	//for all the elements in the threadVector
@@ -76,6 +77,17 @@ void MyScheduler::STRFwoP_policy() {
 
 	//at this point the vector should be sorted by arriving_time
 
+=======
+	for (int i = 0; i < threadVector.size(); i++) {
+		int j = i - 1;
+		ThreadDescriptorBlock temp = threadVector.at(i);
+		while (j >= 0 && temp.remaining_time < threadVector.at(j).remaining_time) {
+			threadVector.at(j + 1) = threadVector.at(j);
+			j--;
+		}
+		threadVector.at(j + 1) = temp;
+	}
+>>>>>>> Stashed changes
 }
 
 /****************************************************
@@ -114,12 +126,14 @@ int MyScheduler::FindNextThread() {
 
 bool MyScheduler::Dispatch() {
 
+	//Remove completed threads from threadVector
 	for (int i = 0; i < threadVector.size(); i++) {
 		if (threadVector.at(i).remaining_time < 1) {
 			threadVector.erase(threadVector.begin() + i);
 		}
 	}
 
+	//If no threads left, we are finished
 	if (threadVector.size() < 1)
 		return false;
 
