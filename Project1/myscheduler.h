@@ -1,3 +1,15 @@
+/********************************************************************
+File: myscheduler.h
+Authors: Mike Berezanich
+		 Aishwarya Patankar
+		 Ryan Gleason
+
+Date: 3/1/2017
+
+Purpose: contains the function definitions and the data structure definition
+
+*********************************************************************/
+
 #pragma once
 #include <vector>
 //myschedule.h
