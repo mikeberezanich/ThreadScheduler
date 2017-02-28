@@ -191,16 +191,30 @@ bool MyScheduler::Dispatch() {
 			ThreadDescriptorBlock *temp;
 			threadsAvailable = AssignThreadToCpu(temp);
 
-			if (threadsAvailable && temp->remaining_time < CPUs[i]->remaining_time) {
-				threadsAvailable = AssignThreadToCpu(CPUs[i]);
+			if (threadsAvailable) {
+				if (CPUs[i] != NULL) {
+					if (temp->remaining_time < CPUs[i]->remaining_time) {
+						threadsAvailable = AssignThreadToCpu(CPUs[i]);
+					}
+				}
+				else {
+					threadsAvailable = AssignThreadToCpu(CPUs[i]);
+				}				
 			}
 		}
 		else if (policy == PBS) {
 			ThreadDescriptorBlock *temp;
 			threadsAvailable = AssignThreadToCpu(temp);
 
-			if (threadsAvailable && temp->priority < CPUs[i]->priority) {
-				threadsAvailable = AssignThreadToCpu(CPUs[i]);
+			if (threadsAvailable) {
+				if (CPUs[i] != NULL) {
+					if (temp->priority <= CPUs[i]->priority) {
+						threadsAvailable = AssignThreadToCpu(CPUs[i]);
+					}
+				}
+				else {
+					threadsAvailable = AssignThreadToCpu(CPUs[i]);
+				}
 			}
 		}
 
