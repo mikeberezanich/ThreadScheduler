@@ -37,7 +37,7 @@ public:
 	void CreateThread(int arriving_time, int remaining_time, int priority, int tid) override; //Function to create threads and insert them in student defined data structure
 	
 	int FindNextThread();
-	bool AssignThreadToCpu(ThreadDescriptorBlock *tcpu);
+	bool AssignThreadToCpu(ThreadDescriptorBlock *&tcpu);
 
 	void SortbyAT();
 	void SortByRT();

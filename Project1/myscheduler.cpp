@@ -113,16 +113,16 @@ int MyScheduler::FindNextThread() {
 			if (CPUs[j] == threadVector.at(i)) {
 				alreadyScheduled = true;
 				
-				cout << "Comparing thread: " << threadVector.at(i)->tid << " with CPU " << j << " which is executing "
-				<< CPUs[j]->tid << endl;
+				/*cout << "Comparing thread: " << threadVector.at(i)->tid << " with CPU " << j << " which is executing "
+				<< CPUs[j]->tid << endl;*/
 			}
 
 			
-			cout << "Is thread: " << threadVector.at(i)->tid << " already scheduled to a CPU: " << alreadyScheduled << endl;
+			/*cout << "Is thread: " << threadVector.at(i)->tid << " already scheduled to a CPU: " << alreadyScheduled << endl;*/
 		}
 
 		if (!alreadyScheduled && timer >= threadVector.at(i)->arriving_time) {
-			cout << "Assigning thread: " << threadVector.at(i)->tid << " to a CPU" << endl;
+			/*cout << "Assigning thread: " << threadVector.at(i)->tid << " to a CPU" << endl;*/
 			return i;
 		}
 	}
@@ -130,7 +130,7 @@ int MyScheduler::FindNextThread() {
 	return -1;
 }
 
-bool MyScheduler::AssignThreadToCpu(ThreadDescriptorBlock *tcpu) {
+bool MyScheduler::AssignThreadToCpu(ThreadDescriptorBlock *&tcpu) {
 	int pos = FindNextThread();
 
 	//if FindNextThread finds a thread that needs assigned
@@ -188,18 +188,18 @@ bool MyScheduler::Dispatch() {
 			}
 		}
 		else if (policy == STRFwP) {
-			ThreadDescriptorBlock temp;
-			threadsAvailable = AssignThreadToCpu(&temp);
+			ThreadDescriptorBlock *temp;
+			threadsAvailable = AssignThreadToCpu(temp);
 
-			if (threadsAvailable && temp.remaining_time < CPUs[i]->remaining_time) {
+			if (threadsAvailable && temp->remaining_time < CPUs[i]->remaining_time) {
 				threadsAvailable = AssignThreadToCpu(CPUs[i]);
 			}
 		}
 		else if (policy == PBS) {
-			ThreadDescriptorBlock temp;
-			threadsAvailable = AssignThreadToCpu(&temp);
+			ThreadDescriptorBlock *temp;
+			threadsAvailable = AssignThreadToCpu(temp);
 
-			if (threadsAvailable && temp.priority < CPUs[i]->priority) {
+			if (threadsAvailable && temp->priority < CPUs[i]->priority) {
 				threadsAvailable = AssignThreadToCpu(CPUs[i]);
 			}
 		}
