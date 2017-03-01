@@ -87,15 +87,13 @@ void MyScheduler::SortByP() {
 	for (int i = 0; i < threadVector.size(); i++) {
 		int j = i - 1;
 		ThreadDescriptorBlock *temp = threadVector.at(i);
+
+		//Moves ones with higher priority to their correct position
+		//If two have same priority, the thread with earlier arrival time is moved forward
 		while (j >= 0 && (temp->priority < threadVector.at(j)->priority || (temp->priority == threadVector.at(j)->priority && temp->arriving_time < threadVector.at(j)->arriving_time))) {
 			threadVector.at(j + 1) = threadVector.at(j);
 			j--;
 		}
-		//need to add checking for same priorities back in
-		//if (temp->priority == threadVector.at(j)->priority) {
-		//	if (temp->arriving_time < threadVector.at(j)->arriving_time) {
-		//		threadVector.at(j + 1) = threadVector.at(j);
-		//	} //might need an else here to break out of loop?
 		threadVector.at(j + 1) = temp;
 	}
 
@@ -149,6 +147,7 @@ bool MyScheduler::Dispatch() {
 		if (threadVector.at(i)->remaining_time < 1) {
 			//delete threadVector.at(i); //or &threadVector.at(i); ? Do we need one of these or will erase do this
 			threadVector.erase(threadVector.begin() + i);
+			i--;
 		}
 	}
 
@@ -173,6 +172,13 @@ bool MyScheduler::Dispatch() {
 		throw 0;
 	}
 
+	bool cpusAvailable = false;
+
+	for (int i = 0; i < num_cpu; i++) {
+		if (CPUs[i] == NULL)
+			cpusAvailable = true;
+	}
+
 	bool threadsAvailable = true;
 	//Assign each cpu to the beginning elements of our now sorted thread vector
 	//This assumes that the vector has been sorted by scheduling policy
@@ -194,13 +200,13 @@ bool MyScheduler::Dispatch() {
 			threadsAvailable = AssignThreadToCpu(temp);
 
 			if (threadsAvailable) {
-				if (CPUs[i] != NULL) {
-					if (temp->remaining_time < CPUs[i]->remaining_time) {
-						threadsAvailable = AssignThreadToCpu(CPUs[i]);
-					}
+				if (CPUs[i] == NULL) {
+					threadsAvailable = AssignThreadToCpu(CPUs[i]);
 				}
 				else {
-					threadsAvailable = AssignThreadToCpu(CPUs[i]);
+					if (temp->remaining_time < CPUs[i]->remaining_time && !cpusAvailable) {
+						threadsAvailable = AssignThreadToCpu(CPUs[i]);
+					}
 				}				
 			}
 		}
@@ -209,14 +215,13 @@ bool MyScheduler::Dispatch() {
 			threadsAvailable = AssignThreadToCpu(temp);
 
 			if (threadsAvailable) {
-				if (CPUs[i] != NULL) {
-					if (temp->priority <= CPUs[i]->priority) {
-						threadsAvailable = AssignThreadToCpu(CPUs[i]);
-
-					}
+				if (CPUs[i] == NULL) {
+					threadsAvailable = AssignThreadToCpu(CPUs[i]);
 				}
 				else {
-					threadsAvailable = AssignThreadToCpu(CPUs[i]);
+					if ((temp->priority < CPUs[i]->priority || (temp->priority == CPUs[i]->priority && temp->arriving_time < CPUs[i]->arriving_time))  && !cpusAvailable) {
+						threadsAvailable = AssignThreadToCpu(CPUs[i]);
+					}
 				}
 			}
 		}
