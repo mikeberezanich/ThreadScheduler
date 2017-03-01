@@ -149,7 +149,7 @@ bool MyScheduler::Dispatch() {
 	//Remove completed threads from threadVector
 	for (int i = 0; i < threadVector.size(); i++) {
 		if (threadVector.at(i)->remaining_time < 1) {
-			//delete threadVector.at(i); or &threadVector.at(i); ? Do we need one of these or will erase do this
+			//delete threadVector.at(i); //or &threadVector.at(i); ? Do we need one of these or will erase do this
 			threadVector.erase(threadVector.begin() + i);
 		}
 	}
