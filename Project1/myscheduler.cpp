@@ -87,17 +87,15 @@ void MyScheduler::SortByP() {
 	for (int i = 0; i < threadVector.size(); i++) {
 		int j = i - 1;
 		ThreadDescriptorBlock *temp = threadVector.at(i);
-		while (j >= 0 && temp->priority <= threadVector.at(j)->priority) {
-			if (temp->priority == threadVector.at(j)->priority) {
-				if (temp->arriving_time < threadVector.at(j)->arriving_time) {
-					threadVector.at(j + 1) = threadVector.at(j);
-				} //might need an else here to break out of loop?
-			}
-			else {
-				threadVector.at(j + 1) = threadVector.at(j);
-			}
+		while (j >= 0 && (temp->priority < threadVector.at(j)->priority || (temp->priority == threadVector.at(j)->priority && temp->arriving_time < threadVector.at(j)->arriving_time))) {
+			threadVector.at(j + 1) = threadVector.at(j);
 			j--;
 		}
+		//need to add checking for same priorities back in
+		//if (temp->priority == threadVector.at(j)->priority) {
+		//	if (temp->arriving_time < threadVector.at(j)->arriving_time) {
+		//		threadVector.at(j + 1) = threadVector.at(j);
+		//	} //might need an else here to break out of loop?
 		threadVector.at(j + 1) = temp;
 	}
 
@@ -181,6 +179,10 @@ bool MyScheduler::Dispatch() {
 	//If FindNextThread() call returns with error, no threads can be scheduled yet so we escape
 	for (int i = 0; i < num_cpu && threadsAvailable; i++) {
 
+		/*if (CPUs[i] != NULL && CPUs[i]->remaining_time < 1) {
+			CPUs[i] = NULL;
+		}*/
+
 		//For non preemptive policies, wait until the next cpu is null
 		if (policy == FCFS || policy == STRFwoP) {
 			if (CPUs[i] == NULL) {
@@ -210,6 +212,7 @@ bool MyScheduler::Dispatch() {
 				if (CPUs[i] != NULL) {
 					if (temp->priority <= CPUs[i]->priority) {
 						threadsAvailable = AssignThreadToCpu(CPUs[i]);
+
 					}
 				}
 				else {
