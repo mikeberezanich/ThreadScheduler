@@ -1,4 +1,4 @@
-/********************************************************************
+/************************************************************************************
 File: myscheduler.cpp
 Authors: Mike Berezanich
 		 Aishwarya Patankar
@@ -12,7 +12,7 @@ Purpose: schedule incoming threads using the following policies
 		3. SRTF, with preemption
 		4. Priority Based Scheduling (PBS), with preemption
 
-*********************************************************************/
+************************************************************************************/
 //myschedule.cpp
 /*Define all the functions in 'myschedule.h' here.*/
 #include "myscheduler.h"
@@ -33,15 +33,14 @@ void MyScheduler::CreateThread(int arriving_time, int remaining_time, int priori
 
 }
 
-/****************************************************
-Sorts the CPU processes by their arrival time.
+
+/*************************************************************************************
+Sorts the threads vector by ascneding arrival time using insertion sort
 
 Used by FCFS_policy: FIRST COME FIRST SERVE
-****************************************************/
+*************************************************************************************/
 void MyScheduler::SortbyAT(){ 
 
-	//insertion sort the arrays based on arrival time
-	//for all the elements in the threadVector
 	for (int i = 0; i < threadVector.size(); i++) { 
 		int j = i - 1;
 		ThreadDescriptorBlock *temp = threadVector.at(i);
@@ -52,17 +51,15 @@ void MyScheduler::SortbyAT(){
 		threadVector.at(j + 1) = temp; 
 	}
 
-	//at this point the vector should be sorted by arriving_time
-
-
 }
 
-/****************************************************
-Sorts the CPU processes by their remaining time.
+
+/*************************************************************************************
+Sorts the threads vector by ascending remaining time using insertion sort
 
 Used by STRFwoP_policy: SHORTEST TIME REMAINING W/O PREEMPTION
 Used by STRFwP_policy: SHORTEST TIME REMAINING WITH PREEMPTION
-****************************************************/
+*************************************************************************************/
 void MyScheduler::SortByRT() {
 
 	for (int i = 0; i < threadVector.size(); i++) { 
@@ -77,18 +74,22 @@ void MyScheduler::SortByRT() {
 
 }
 
-/****************************************************
-Sorts the CPU processes by their priority.
+
+/*************************************************************************************
+Sorts the threads vector by descending priority using insertion sort
+
+If two threads have the same priority, the one with the earlier arrival time will be 
+put ahead of the one with the later arrival time
 
 Used by PBS_policy: PRIORITY BASED SCHEDULING
-****************************************************/
+*************************************************************************************/
 void MyScheduler::SortByP() {
 
 	for (int i = 0; i < threadVector.size(); i++) {
 		int j = i - 1;
 		ThreadDescriptorBlock *temp = threadVector.at(i);
 
-		//Moves ones with higher priority to their correct position
+		//Moves threads with higher priority to their correct position
 		//If two have same priority, the thread with earlier arrival time is moved forward
 		while (j >= 0 && (temp->priority < threadVector.at(j)->priority || (temp->priority == threadVector.at(j)->priority && temp->arriving_time < threadVector.at(j)->arriving_time))) {
 			threadVector.at(j + 1) = threadVector.at(j);
@@ -99,33 +100,45 @@ void MyScheduler::SortByP() {
 
 }
 
-//Returns position of next available thread in threadVector 
-//or a -1 if all threads are already assigned to a CPU
+
+/*************************************************************************************
+Used to find the next available thread to be scheduled in the thread vector 
+
+Returns position of next available thread in the thread vector -or-
+Returns a -1 if all threads are already assigned to a CPU
+*************************************************************************************/
 int MyScheduler::FindNextThread() {
+
 	for (int i = 0; i < threadVector.size(); i++) {
 		bool alreadyScheduled = false;
 		
+		//go through all our cpu's and check if any of them are already executing the current thread we're on
 		for (int j = 0; j < num_cpu && !alreadyScheduled; j++) {
 			if (CPUs[j] == threadVector.at(i)) {
 				alreadyScheduled = true;
-				
-				/*cout << "Comparing thread: " << threadVector.at(i)->tid << " with CPU " << j << " which is executing "
-				<< CPUs[j]->tid << endl;*/
 			}
-
-			
-			/*cout << "Is thread: " << threadVector.at(i)->tid << " already scheduled to a CPU: " << alreadyScheduled << endl;*/
 		}
 
+		//if the thread is not already scheduled to a cpu and has arrived, return the thread
 		if (!alreadyScheduled && timer >= threadVector.at(i)->arriving_time) {
-			/*cout << "Assigning thread: " << threadVector.at(i)->tid << " to a CPU" << endl;*/
 			return i;
 		}
 	}
 
+	//if no threads are currently ready to be scheduled, return -1 to tell caller function that
 	return -1;
 }
 
+
+/*************************************************************************************
+Assigns a thread found by FindNextThread() call 
+
+Usually the argument will be a pointer to one of our cpu's, but it is also sometimes
+called with a temp pointer to check if any threads are currently available
+
+Returns true if it is able to assign a thread to tcpu -or-
+Returns false if no threads can be scheduled to tcpu right now
+*************************************************************************************/
 bool MyScheduler::AssignThreadToCpu(ThreadDescriptorBlock *&tcpu) {
 	int pos = FindNextThread();
 
@@ -139,13 +152,11 @@ bool MyScheduler::AssignThreadToCpu(ThreadDescriptorBlock *&tcpu) {
 }
 
 
-
 bool MyScheduler::Dispatch() {
 
 	//Remove completed threads from threadVector
 	for (int i = 0; i < threadVector.size(); i++) {
 		if (threadVector.at(i)->remaining_time < 1) {
-			//delete threadVector.at(i); //or &threadVector.at(i); ? Do we need one of these or will erase do this
 			threadVector.erase(threadVector.begin() + i);
 			i--;
 		}
@@ -172,22 +183,18 @@ bool MyScheduler::Dispatch() {
 		throw 0;
 	}
 
+	//check if any cpu's need scheduled
 	bool cpusAvailable = false;
-
 	for (int i = 0; i < num_cpu; i++) {
 		if (CPUs[i] == NULL)
 			cpusAvailable = true;
 	}
 
-	bool threadsAvailable = true;
 	//Assign each cpu to the beginning elements of our now sorted thread vector
 	//This assumes that the vector has been sorted by scheduling policy
 	//If FindNextThread() call returns with error, no threads can be scheduled yet so we escape
+	bool threadsAvailable = true;
 	for (int i = 0; i < num_cpu && threadsAvailable; i++) {
-
-		/*if (CPUs[i] != NULL && CPUs[i]->remaining_time < 1) {
-			CPUs[i] = NULL;
-		}*/
 
 		//For non preemptive policies, wait until the next cpu is null
 		if (policy == FCFS || policy == STRFwoP) {
@@ -195,6 +202,9 @@ bool MyScheduler::Dispatch() {
 				threadsAvailable = AssignThreadToCpu(CPUs[i]);
 			}
 		}
+		//For policies with preemption, we first check if any new threads are ready to be scheduled
+		//If so, assign the new thread to either the first empty cpu (if there are any empty) -or-
+		//Assign it to the first cpu it finds with a lower remaining time / priority
 		else if (policy == STRFwP) {
 			ThreadDescriptorBlock *temp;
 			threadsAvailable = AssignThreadToCpu(temp);
@@ -227,16 +237,6 @@ bool MyScheduler::Dispatch() {
 		}
 
 	}
-	
-
-	//Printing for debugging purposes
-	/*for (int i = 0; i < threadVector.size(); i++) {
-		if (i < num_cpu)
-			cout << "CPU " << i << " executing thread " << CPUs[i]->tid << endl;
-
-		cout << "Thread " << threadVector.at(i)->tid << " - Rtime: " << threadVector.at(i)->remaining_time << endl;
-		system("pause");
-	}*/
 
 	return true;
 }
